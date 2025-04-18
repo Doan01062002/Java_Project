@@ -5,4 +5,5 @@ import ra.edu.business.service.AppService;
 
 public interface AdminService extends AppService <Admin> {
     Admin login(String username, String password);
+    boolean lockStudent(int studentId, boolean isActive);
 }

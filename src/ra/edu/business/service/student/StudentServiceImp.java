@@ -15,27 +15,52 @@ public class StudentServiceImp implements StudentService{
     }
 
     @Override
+    public boolean register(Student student) {
+        return studentDAO.register(student);
+    }
+
+    @Override
+    public List<Student> findByNameOrEmailOrCode(String search) {
+        return studentDAO.findByNameOrEmailOrCode(search);
+    }
+
+    @Override
+    public List<Student> findAllWithPagination(int page, int pageSize) {
+        return studentDAO.findAllWithPagination(page, pageSize);
+    }
+
+    @Override
+    public List<Student> findByNameOrEmailOrCodeWithPagination(String search, int page, int pageSize) {
+        return studentDAO.findByNameOrEmailOrCodeWithPagination(search, page, pageSize);
+    }
+
+    @Override
+    public List<Student> sortWithPagination(String sortBy, boolean ascending, int page, int pageSize) {
+        return studentDAO.sortWithPagination(sortBy, ascending, page, pageSize);
+    }
+
+    @Override
     public boolean save(Student student) {
-        return false;
+        return studentDAO.save(student);
     }
 
     @Override
     public boolean update(Student student) {
-        return false;
+        return studentDAO.update(student);
     }
 
     @Override
     public boolean delete(Student student) {
-        return false;
+        return studentDAO.delete(student);
     }
 
     @Override
     public Student findById(int id) {
-        return null;
+        return studentDAO.findById(id);
     }
 
     @Override
     public List<Student> findAll() {
-        return List.of();
+        return studentDAO.findAll();
     }
 }

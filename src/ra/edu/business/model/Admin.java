@@ -1,4 +1,3 @@
-// Admin.java
 package ra.edu.business.model;
 
 public class Admin {
@@ -6,16 +5,24 @@ public class Admin {
     private String username;
     private String password;
     private String email;
+    private String fullName;
 
-    // Constructor with all fields
-    public Admin(int id, String username, String password, String email) {
+    public Admin(int id, String username, String password, String email, String fullName) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
+        this.fullName = fullName;
     }
 
-    // Getters and setters (if not already present)
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
     public int getId() {
         return id;
     }

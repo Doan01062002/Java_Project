@@ -39,6 +39,11 @@ public class AdminServiceImp implements AdminService {
     }
 
     @Override
+    public boolean lockStudent(int studentId, boolean isActive) {
+        return adminDAO.lockStudent(studentId,isActive);
+    }
+
+    @Override
     public List<Admin> findAll() {
         return adminDAO.findAll();
     }

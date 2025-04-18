@@ -1,32 +1,26 @@
 package ra.edu.business.model;
 
-import java.sql.Timestamp;
-
 public class Course {
     private int id;
     private String courseCode;
     private String name;
     private String description;
-    private Integer createdByAdminId; // Use Integer to allow null
+    private Integer createdByAdminId;
     private int duration; // Duration in hours or days, define unit clearly
     private String instructor;
-    private Timestamp createdAt;
+    private String createdAt;
 
-    // Constructors
     public Course() {}
 
-    public Course(int id, String courseCode, Integer createdByAdminId) {
-        this.id = id;
+    public Course(String courseCode, String name, String description, int duration, String instructor, String createdAt) {
         this.courseCode = courseCode;
         this.name = name;
         this.description = description;
-        this.createdByAdminId = createdByAdminId;
         this.duration = duration;
         this.instructor = instructor;
         this.createdAt = createdAt;
     }
 
-    // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getCourseCode() { return courseCode; }
@@ -41,8 +35,8 @@ public class Course {
     public void setDuration(int duration) { this.duration = duration; }
     public String getInstructor() { return instructor; }
     public void setInstructor(String instructor) { this.instructor = instructor; }
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public String getCreatedAt() { return createdAt; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 
     @Override
     public String toString() {

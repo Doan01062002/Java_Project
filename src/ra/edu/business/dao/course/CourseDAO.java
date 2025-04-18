@@ -10,7 +10,9 @@ public interface CourseDAO {
     boolean delete(Course course);
     Course findById(int id);
     List<Course> findAll();
+    List<Course> findAllWithPagination(int page, int pageSize); // Thêm phân trang
     List<Course> findByName(String name);
-    List<Course> sortByName(boolean ascending);
-    List<Course> sortById(boolean ascending);
+    List<Course> findByNameWithPagination(String name, int page, int pageSize); // Thêm tìm kiếm với phân trang
+    List<Course> sortWithPagination(String sortBy, boolean ascending, int page, int pageSize); // Thêm sắp xếp với phân trang
+    List<Course> getTopCourses(int limit);
 }

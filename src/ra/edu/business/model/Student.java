@@ -7,18 +7,27 @@ public class Student {
     private int id;
     private String studentCode;
     private String username;
-    private String password; // !!! Nên được hash
+    private String password; // Should be hashed
     private String fullName;
     private String email;
     private Boolean sex; // true for male, false for female, null if not specified
     private String phone;
     private Date dob; // Date of Birth
     private Timestamp createdAt;
+    private boolean isActive;
 
-    // Constructors
-    public Student(int id, String username, String password, String email) {}
+    public Student() {
+        this.isActive = true;
+    }
 
-    // Getters and Setters
+    public Student(int id, String username, String password, String email) {
+        this.id = id;
+        this.username = username;
+        this.password = password; // Should be hashed
+        this.email = email;
+        this.isActive = true;
+    }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getStudentCode() { return studentCode; }
@@ -39,6 +48,8 @@ public class Student {
     public void setDob(Date dob) { this.dob = dob; }
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
 
     @Override
     public String toString() {
@@ -52,6 +63,7 @@ public class Student {
                 ", phone='" + (phone == null ? "N/A" : phone) + '\'' +
                 ", dob=" + (dob == null ? "N/A" : dob) +
                 ", createdAt=" + createdAt +
+                ", isActive=" + isActive +
                 '}';
     }
 }

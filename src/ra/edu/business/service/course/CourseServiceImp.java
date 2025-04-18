@@ -40,12 +40,22 @@ public class CourseServiceImp implements CourseService {
     }
 
     @Override
-    public List<Course> sortByName(boolean ascending) {
-        return courseDAO.sortByName(ascending);
+    public List<Course> findAllWithPagination(int page, int pageSize) {
+        return courseDAO.findAllWithPagination(page, pageSize);
     }
 
     @Override
-    public List<Course> sortById(boolean ascending) {
-        return courseDAO.sortById(ascending);
+    public List<Course> findByNameWithPagination(String name, int page, int pageSize) {
+        return courseDAO.findByNameWithPagination(name, page, pageSize);
+    }
+
+    @Override
+    public List<Course> sortWithPagination(String sortBy, boolean ascending, int page, int pageSize) {
+        return courseDAO.sortWithPagination(sortBy, ascending, page, pageSize);
+    }
+
+    @Override
+    public List<Course> getTopCourses(int limit) {
+        return courseDAO.getTopCourses(limit);
     }
 }
