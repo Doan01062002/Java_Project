@@ -1,91 +1,133 @@
 package ra.edu.validate;
 
+import ra.edu.utils.UIUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Validator {
-    public static int validateInt(String input){
-        try {
-            return Integer.parseInt(input);
-        } catch (NumberFormatException e) {
-            System.err.println("Lỗi: Giá trị phải là số nguyên hợp lệ!");
+    public static int validateInt(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                return Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                UIUtils.showError("Giá trị phải là số nguyên hợp lệ!");
+            }
         }
-        return -1;
     }
 
-    public static String validateString(String input){
-        if (input == null || input.trim().isEmpty()){
-            System.err.println("Lỗi: Chuỗi không được để trống!");
-            return "";
+    public static String validateString(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if (!input.isEmpty()) {
+                return input;
+            }
+            UIUtils.showError("Chuỗi không được để trống!");
         }
-        return input.trim();
     }
 
-    public static String validateEmail(String input){
+    public static String validateEmail(Scanner scanner, String prompt) {
         String emailRegex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
-        if (!Pattern.matches(emailRegex,input)) {
-            System.err.println("Lỗi: Email không hợp lệ!");
-            return "";
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if (Pattern.matches(emailRegex, input)) {
+                return input;
+            }
+            UIUtils.showError("Email không hợp lệ!");
         }
-        return input;
     }
 
-    public static String validateDate(String input){
+    public static String validateDate(Scanner scanner, String prompt) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            sdf.parse(input);
-            return input;
-        } catch (ParseException e) {
-            System.err.println("Lỗi: Ngày không hợp lệ, định dạng đúng là: dd/MM/yyyy");
-            return "";
+        sdf.setLenient(false);
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                return input; // Cho phép để trống
+            }
+            try {
+                sdf.parse(input);
+                return input;
+            } catch (ParseException e) {
+                UIUtils.showError("Ngày không hợp lệ, định dạng đúng là: dd/MM/yyyy");
+            }
         }
     }
 
-    public static String validatePhone(String input){
+    public static String validatePhone(Scanner scanner, String prompt) {
         String phoneRegex = "^(0[3|5|7|8|9])+([0-9]{8})$";
-        if (!Pattern.matches(phoneRegex,input)){
-            System.err.println("Lỗi: Số điện thoại Việt Nam không hợp lệ!");
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                return input; // Cho phép để trống
+            }
+            if (Pattern.matches(phoneRegex, input)) {
+                return input;
+            }
+            UIUtils.showError("Số điện thoại Việt Nam không hợp lệ!");
         }
-        return input;
     }
 
-    public static String validatePassword(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            System.err.println("Lỗi: Mật khẩu không được để trống!");
-            return "";
-        }
-
-        if (input.contains(" ")) {
-            System.err.println("Lỗi: Mật khẩu không được chứa dấu cách!");
-            return "";
-        }
-
-        // Regex: ít nhất 1 chữ thường, 1 chữ hoa, 1 số, 1 ký tự đặc biệt, dài 10–100 ký tự
+    public static String validatePassword(Scanner scanner, String prompt) {
         String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{10,100}$";
-
-        if (!input.matches(passwordRegex)) {
-            System.err.println("Lỗi: Mật khẩu phải từ 10–100 ký tự, chứa ít nhất 1 chữ thường, 1 chữ hoa, 1 số và 1 ký tự đặc biệt!");
-            return "";
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                UIUtils.showError("Mật khẩu không được để trống!");
+                continue;
+            }
+            if (input.contains(" ")) {
+                UIUtils.showError("Mật khẩu không được chứa dấu cách!");
+                continue;
+            }
+            if (input.matches(passwordRegex)) {
+                return input;
+            }
+            UIUtils.showError("Mật khẩu phải từ 10–100 ký tự, chứa ít nhất 1 chữ thường, 1 chữ hoa, 1 số và 1 ký tự đặc biệt!");
         }
-        return input;
     }
 
-    public static String validateStudentId(String input) {
+    public static String validateStudentId(Scanner scanner, String prompt) {
         String studentIdRegex = "^SV\\d{3}$";
-        if (input == null || !input.toUpperCase().matches(studentIdRegex)) {
-            System.err.println("Lỗi: Mã sinh viên phải có định dạng SV + 3 chữ số (VD: SV001)");
-            return "";
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim().toUpperCase();
+            if (input.matches(studentIdRegex)) {
+                return input;
+            }
+            UIUtils.showError("Mã sinh viên phải có định dạng SV + 3 chữ số (VD: SV001)");
         }
-        return input;
     }
 
-    public static String validateUsername(String input) {
-        String usernameRegex = "^[a-z0-9]{10,45}$";
-        if (input == null || !input.matches(usernameRegex)) {
-            System.err.println("Lỗi: Username phải dài 10-45 ký tự, viết liền, không dấu, không chứa ký tự đặc biệt và chỉ dùng chữ thường + số!");
-            return "";
+    public static String validateCourseId(Scanner scanner, String prompt) {
+        String courseIdRegex = "^KSB\\d{3}$";
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim().toUpperCase();
+            if (input.matches(courseIdRegex)) {
+                return input;
+            }
+            UIUtils.showError("Mã khóa học phải có định dạng KSB + 3 chữ số (VD: KSB001)");
         }
-        return input;
+    }
+
+    public static String validateUsername(Scanner scanner, String prompt) {
+        String usernameRegex = "^[a-z0-9]{10,45}$";
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            if (input.matches(usernameRegex)) {
+                return input;
+            }
+            UIUtils.showError("Username phải dài 10-45 ký tự, viết liền, không dấu, chỉ dùng chữ thường và số!");
+        }
     }
 }
