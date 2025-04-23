@@ -11,4 +11,6 @@ public interface EnrollmentDAO extends AppDAO<Enrollment> {
     List<Enrollment> findByCourseIdWithPagination(int courseId, int page, int pageSize); // Thêm phân trang
     List<Enrollment> findByStudentId(int studentId);
     int countStudentsByCourse(int courseId);
+    boolean existsByStudentIdAndCourseId(int studentId, int courseId);
+    boolean deleteById(int id);
 }

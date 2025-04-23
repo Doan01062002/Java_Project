@@ -10,4 +10,5 @@ public interface StatisticDAO {
     List<Course> getCoursesWithStudentCount();
     List<Course> getTop5CoursesByStudents();
     List<Course> getCoursesWithMoreThan10Students();
+    int countStudentsByCourse(int courseId);
 }

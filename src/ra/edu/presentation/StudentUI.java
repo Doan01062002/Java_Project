@@ -30,11 +30,12 @@ public class StudentUI {
             System.out.println("├────────────────────────────────────────────────────────┤");
             System.out.println("│ 1. Xem danh sách khóa học (phân trang)                 │");
             System.out.println("│ 2. Đăng ký khóa học                                    │");
-            System.out.println("│ 3. Xem danh sách khóa học đã đăng ký                   │");
-            System.out.println("│ 4. Tìm kiếm khóa học theo tên (phân trang)             │");
-            System.out.println("│ 5. Sắp xếp khóa học (phân trang)                       │");
-            System.out.println("│ 6. Cập nhật thông tin cá nhân                          │");
-            System.out.println("│ 7. Đăng xuất                                           │");
+            System.out.println("│ 3. Hủy đăng ký khóa học                                │");
+            System.out.println("│ 4. Xem danh sách khóa học đã đăng ký                   │");
+            System.out.println("│ 5. Tìm kiếm khóa học theo tên (phân trang)             │");
+            System.out.println("│ 6. Sắp xếp khóa học (phân trang)                       │");
+            System.out.println("│ 7. Cập nhật thông tin cá nhân                          │");
+            System.out.println("│ 8. Đăng xuất                                           │");
             System.out.println("═════════════════════════════════════════════════════════");
             System.out.print("Nhập lựa chọn của bạn: ");
             int choice = Validator.validateInt(scanner.nextLine());
@@ -45,14 +46,22 @@ public class StudentUI {
                     break;
                 case 2:
                     // Đăng ký khóa học
+//                    registerCourse(scanner, student);
                     System.out.print("Nhập ID khóa học cần đăng ký: ");
                     int courseId = Validator.validateInt(scanner.nextLine());
                     if (courseId <= 0) break;
+
                     Course course = courseService.findById(courseId);
                     if (course == null) {
                         System.out.println("Khóa học không tồn tại.");
                         break;
                     }
+
+                    if (enrollmentService.existsByStudentIdAndCourseId(student.getId(), courseId)) {
+                        System.out.println("Bạn đã đăng ký hoặc gửi đơn đăng ký khóa học này rồi.");
+                        break;
+                    }
+
                     System.out.println("Thông tin khóa học:");
                     displayCourseTable(List.of(course));
                     System.out.print("Xác nhận đăng ký (Y/N): ");
@@ -71,6 +80,42 @@ public class StudentUI {
                     }
                     break;
                 case 3:
+                    // Hủy đăng ký khóa học
+                    cancelRegistration(scanner, student);
+//                    System.out.print("Nhập ID đăng ký: ");
+//                    int id = Validator.validateInt(scanner.nextLine());
+//                    if (id <= 0) break;
+//
+//                    Enrollment enrollment = enrollmentService.findById(id);
+//                    if (enrollment == null) {
+//                        System.out.println("Đăng ký không tồn tại.");
+//                        break;
+//                    }
+//                    if (enrollment.getStudentRefId() != student.getId()) {
+//                        System.out.println("Bạn không có quyền hủy đăng ký này.");
+//                        break;
+//                    }
+//
+//                    System.out.println("Chọn hành động:");
+//                    System.out.println("1. Hủy đăng ký");
+//                    System.out.println("2. Hủy");
+//                    int action = Validator.validateInt(scanner.nextLine());
+//                    if (action == 1) {
+//                        enrollment.setStatus(EnrollmentStatus.CANCEL);
+//                    } else if (action == 2) {
+//                        enrollment.setStatus(EnrollmentStatus.WAITING);
+//                    } else {
+//                        System.out.println("Lựa chọn không hợp lệ.");
+//                        break;
+//                    }
+//
+//                    if (enrollmentService.update(enrollment)) {
+//                        System.out.println("Xử lý hủy đăng ký thành công.");
+//                    } else {
+//                        System.out.println("Xử lý hủy đăng ký thất bại.");
+//                    }
+                    break;
+                case 4:
                     // Xem danh sách khóa học đã đăng ký
                     List<Enrollment> enrollments = enrollmentService.findByStudentId(student.getId());
                     if (enrollments.isEmpty()) {
@@ -80,14 +125,14 @@ public class StudentUI {
                         displayEnrolledCoursesTable(enrollments);
                     }
                     break;
-                case 4:
+                case 5:
                     // Tìm kiếm khóa học theo tên với phân trang
                     System.out.print("Nhập tên khóa học cần tìm: ");
                     String searchName = Validator.validateString(scanner.nextLine());
                     if (searchName.isEmpty()) break;
                     displayCoursesSearchWithPagination(scanner, searchName);
                     break;
-                case 5:
+                case 6:
                     // Sắp xếp khóa học với phân trang
                     System.out.println("Chọn tiêu chí sắp xếp:");
                     System.out.println("1. Theo tên (tăng dần)");
@@ -120,7 +165,7 @@ public class StudentUI {
                     }
                     displayCoursesSortWithPagination(scanner, sortBy, ascending);
                     break;
-                case 6:
+                case 7:
                     // Cập nhật thông tin cá nhân
                     System.out.println("Thông tin hiện tại:");
                     displayStudentTable(List.of(student));
@@ -153,7 +198,7 @@ public class StudentUI {
                         System.out.println("Cập nhật thông tin cá nhân thất bại.");
                     }
                     break;
-                case 7:
+                case 8:
                     System.out.print("Xác nhận đăng xuất (Y/N): ");
                     String logoutConfirm = scanner.nextLine();
                     if (logoutConfirm.equalsIgnoreCase("Y")) {
@@ -166,6 +211,85 @@ public class StudentUI {
             }
         } while (true);
     }
+
+    private void registerCourse(Scanner scanner, Student student) {
+        printHeader("ĐĂNG KÝ KHÓA HỌC");
+        System.out.print("Nhập ID khóa học: ");
+        int courseId = Validator.validateInt(scanner.nextLine());
+        if (courseId <= 0) {
+            System.out.println("ID không hợp lệ.");
+            return;
+        }
+
+        Course course = courseService.findById(courseId);
+        if (course == null) {
+            System.out.println("Khóa học không tồn tại.");
+            return;
+        }
+
+        // Kiểm tra xem sinh viên đã đăng ký khóa học này chưa
+        if (enrollmentService.existsByStudentIdAndCourseId(student.getId(), courseId)) {
+            System.out.println("Bạn đã đăng ký khóa học này rồi.");
+            return;
+        }
+
+        System.out.println("Thông tin khóa học:");
+        displayCourseTable(List.of(course));
+
+        if (confirmAction(scanner, "đăng ký khóa học")) {
+            Enrollment enrollment = new Enrollment();
+            enrollment.setEnrollmentCode("ENR" + System.currentTimeMillis());
+            enrollment.setStudentRefId(student.getId());
+            enrollment.setCourseRefId(courseId);
+            enrollment.setStatus(EnrollmentStatus.WAITING);
+            if (enrollmentService.save(enrollment)) {
+                System.out.println("Đăng ký khóa học thành công, đang chờ phê duyệt.");
+            } else {
+                System.out.println("Đăng ký khóa học thất bại.");
+            }
+        }
+    }
+
+    private void cancelRegistration(Scanner scanner, Student student) {
+        printHeader("HỦY ĐĂNG KÝ KHÓA HỌC");
+        System.out.print("Nhập ID đăng ký: ");
+        int id = Validator.validateInt(scanner.nextLine());
+        if (id <= 0) {
+            System.out.println("ID không hợp lệ.");
+            return;
+        }
+
+        Enrollment enrollment = enrollmentService.findById(id);
+        if (enrollment == null) {
+            System.out.println("Đăng ký không tồn tại.");
+            return;
+        }
+        if (enrollment.getStudentRefId() != student.getId()) {
+            System.out.println("Bạn không có quyền hủy đăng ký này.");
+            return;
+        }
+        if (enrollment.getStatus() == EnrollmentStatus.CANCEL) {
+            System.out.println(" Đăng ký đã bị hủy hoặc bị từ chối, không thể hủy lại.");
+            return;
+        }
+        if (enrollment.getStatus() == EnrollmentStatus.CONFIRM){
+            System.out.println("Đăng ký đã được xác nhận, không thể hủy.");
+            return;
+        }
+
+        System.out.println("Thông tin đăng ký:");
+        displayEnrolledCoursesTable(List.of(enrollment));
+
+        if (confirmAction(scanner, "hủy đăng ký")) {
+            enrollment.setStatus(EnrollmentStatus.CANCEL);
+            if (enrollmentService.update(enrollment)) {
+                System.out.println("Hủy đăng ký thành công.");
+            } else {
+                System.out.println("Hủy đăng ký thất bại.");
+            }
+        }
+    }
+
 
     private void displayCoursesWithPagination(Scanner scanner) {
         // Hiển thị danh sách khóa học với phân trang
@@ -245,7 +369,7 @@ public class StudentUI {
             String courseName = course != null ? course.getName() : "N/A";
             System.out.printf("│ %-5d │ %-10s │ %-24s │ %-10s │ %-15s │%n",
                     enrollment.getId(),
-                    enrollment.getEnrollmentCode(),
+                    truncateString(enrollment.getEnrollmentCode(),10),
                     truncateString(courseName, 24),
                     enrollment.getStatus().name(),
                     enrollment.getRegistrationDate() != null ? sdf.format(enrollment.getRegistrationDate()) : "");
@@ -273,5 +397,21 @@ public class StudentUI {
         // Cắt chuỗi nếu vượt quá độ dài tối đa
         if (str == null) return "";
         return str.length() > maxLength ? str.substring(0, maxLength - 3) + "..." : str;
+    }
+
+    private void printHeader(String title) {
+        System.out.println("\n" + "╒═══════════════════════════════════════════════╕");
+        System.out.println("│ " + centerString(title, 45) + " │");
+        System.out.println("╞═══════════════════════════════════════════════╡");
+    }
+
+    private String centerString(String str, int width) {
+        int padding = (width - str.length()) / 2;
+        return " ".repeat(Math.max(0, padding)) + str + " ".repeat(Math.max(0, width - str.length() - padding));
+    }
+
+    private boolean confirmAction(Scanner scanner, String action) {
+        System.out.print("Xác nhận " + action + " (Y/N): ");
+        return scanner.nextLine().equalsIgnoreCase("Y");
     }
 }

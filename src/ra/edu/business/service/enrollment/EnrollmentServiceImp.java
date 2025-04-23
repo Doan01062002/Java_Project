@@ -47,4 +47,14 @@ public class EnrollmentServiceImp implements EnrollmentService {
     public List<Enrollment> findByStudentId(int studentId) {
         return enrollmentDAO.findByStudentId(studentId);
     }
+
+    @Override
+    public boolean existsByStudentIdAndCourseId(int studentId, int courseId) {
+        return enrollmentDAO.existsByStudentIdAndCourseId(studentId, courseId);
+    }
+
+    @Override
+    public boolean deleteById(int id) {
+        return enrollmentDAO.deleteById(id);
+    }
 }

@@ -280,4 +280,32 @@ public class CourseDAOImp implements CourseDAO {
         }
         return courses;
     }
+
+    @Override
+    public boolean existsByCourseCode(String courseCode) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             CallableStatement cs = conn.prepareCall("{CALL sp_courses_exists_by_course_code(?,?)}")) {
+            cs.setString(1, courseCode);
+            cs.registerOutParameter(2, Types.BOOLEAN);
+            cs.execute();
+            return cs.getBoolean(2);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             CallableStatement cs = conn.prepareCall("{CALL sp_courses_exists_by_name(?,?)}")) {
+            cs.setString(1, name);
+            cs.registerOutParameter(2, Types.BOOLEAN);
+            cs.execute();
+            return cs.getBoolean(2);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

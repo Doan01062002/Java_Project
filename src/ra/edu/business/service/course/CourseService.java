@@ -11,4 +11,6 @@ public interface CourseService extends AppService<Course> {
     List<Course> findByNameWithPagination(String name, int page, int pageSize); // Thêm tìm kiếm với phân trang
     List<Course> sortWithPagination(String sortBy, boolean ascending, int page, int pageSize); // Thêm sắp xếp với phân trang
     List<Course> getTopCourses(int limit);
+    boolean existsByCourseCode(String courseCode); // Kiểm tra mã khóa học trùng
+    boolean existsByName(String name);
 }

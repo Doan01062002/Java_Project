@@ -58,4 +58,14 @@ public class CourseServiceImp implements CourseService {
     public List<Course> getTopCourses(int limit) {
         return courseDAO.getTopCourses(limit);
     }
+
+    @Override
+    public boolean existsByCourseCode(String courseCode) {
+        return courseDAO.existsByCourseCode(courseCode);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return courseDAO.existsByName(name);
+    }
 }

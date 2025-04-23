@@ -124,4 +124,23 @@ public class StatisticDAOImp implements StatisticDAO {
         }
         return courses;
     }
+
+    @Override
+    public int countStudentsByCourse(int courseId) {
+        String query = "{CALL CountStudentsByCourse(?)}";
+        try (Connection connection = DatabaseConnection.getConnection();
+             CallableStatement stmt = connection.prepareCall(query)) {
+            stmt.setInt(1, courseId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error counting students by course: " + e.getMessage());
+        }finally {
+            DatabaseConnection.closeConnection(DatabaseConnection.getConnection());
+        }
+        return 0;
+    }
 }

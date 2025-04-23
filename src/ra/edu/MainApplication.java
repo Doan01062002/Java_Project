@@ -38,7 +38,7 @@ public class MainApplication {
                         AdminUI adminUI = new AdminUI();
                         adminUI.displayMenuAdmin(scanner);
                     } else {
-                        System.out.println("Tên đăng nhập hoặc mật khẩu không đúng.");
+                        System.err.println("Tên đăng nhập hoặc mật khẩu không đúng.");
                     }
                     break;
                 case 2:
@@ -53,7 +53,7 @@ public class MainApplication {
                         StudentUI studentUI = new StudentUI();
                         studentUI.displayMenuStudent(scanner, student);
                     } else {
-                        System.out.println("Tên đăng nhập hoặc mật khẩu không đúng.");
+                        System.err.println("Tên đăng nhập hoặc mật khẩu không đúng.");
                     }
                     break;
                 case 3:
@@ -86,7 +86,7 @@ public class MainApplication {
                         try {
                             dob = new SimpleDateFormat("dd/MM/yyyy").parse(dobInput);
                         } catch (ParseException e) {
-                            System.out.println("Ngày sinh không hợp lệ.");
+                            System.err.println("Ngày sinh không hợp lệ.");
                             break;
                         }
                     }

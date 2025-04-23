@@ -14,7 +14,6 @@ public class DatabaseConnection {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            System.out.println("Kết nối database thành công!");
         } catch (SQLException e) {
             System.err.println("kết nối thất bại: " + e.getMessage());
         }
@@ -25,7 +24,6 @@ public class DatabaseConnection {
         if (connection != null) {
             try {
                 connection.close();
-                System.out.println("Đóng kêt nối database thành công!");
             } catch (SQLException e) {
                 System.err.println("Đóng kết nối thất bại: " + e.getMessage());
             }

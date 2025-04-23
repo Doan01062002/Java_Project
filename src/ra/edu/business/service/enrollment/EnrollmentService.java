@@ -10,4 +10,6 @@ public interface EnrollmentService extends AppService<Enrollment> {
     List<Enrollment> findByCourseId(int courseId);
     List<Enrollment> findByCourseIdWithPagination(int courseId, int page, int pageSize); // Thêm phân trang
     List<Enrollment> findByStudentId(int studentId);
+    boolean existsByStudentIdAndCourseId(int studentId, int courseId);
+    boolean deleteById(int id);
 }

@@ -1,7 +1,7 @@
 package ra.edu.business.model;
 
 public enum EnrollmentStatus {
-    WAITING, DENIED, CANCEL, CONFIRM;
+    WAITING, CANCEL, CONFIRM;
 
     // Helper để chuyển đổi String từ DB sang Enum
     public static EnrollmentStatus fromString(String statusStr) {

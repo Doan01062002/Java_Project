@@ -229,7 +229,42 @@ public class EnrollmentDAOImp implements EnrollmentDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally {
+            DatabaseConnection.closeConnection(DatabaseConnection.getConnection());
         }
         return 0;
+    }
+
+    @Override
+    public boolean existsByStudentIdAndCourseId(int studentId, int courseId) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             CallableStatement cs = conn.prepareCall("{CALL sp_enrollment_exists_by_student_and_course(?,?,?)}")) {
+            cs.setInt(1, studentId);
+            cs.setInt(2, courseId);
+            cs.registerOutParameter(3, Types.BOOLEAN);
+            cs.execute();
+            return cs.getBoolean(3);
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi kiểm tra đăng ký: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }finally {
+            DatabaseConnection.closeConnection(DatabaseConnection.getConnection());
+        }
+    }
+
+    @Override
+    public boolean deleteById(int id) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             CallableStatement cs = conn.prepareCall("{CALL sp_enrollments_delete_by_id(?)}")) {
+            cs.setInt(1, id);
+            return cs.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi xóa đăng ký: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }finally {
+            DatabaseConnection.closeConnection(DatabaseConnection.getConnection());
+        }
     }
 }
