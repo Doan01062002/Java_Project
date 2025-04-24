@@ -12,4 +12,8 @@ public interface StudentService extends AppService<Student> {
     List<Student> findAllWithPagination(int page, int pageSize); // Thêm phân trang
     List<Student> findByNameOrEmailOrCodeWithPagination(String search, int page, int pageSize); // Thêm tìm kiếm với phân trang
     List<Student> sortWithPagination(String sortBy, boolean ascending, int page, int pageSize); // Thêm sắp xếp với phân trang
+    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
+    boolean existsByPhone(String phone);
+    boolean existsByStudentCode(String studentCode);
 }

@@ -25,16 +25,16 @@ public class StudentUI {
     public void displayMenuStudent(Scanner scanner, Student student) {
         while (true) {
             UIUtils.printHeader("MENU SINH VIÊN");
-            System.out.println("│ Xin chào, " + UIUtils.truncateString(student.getFullName(), 35) + " │");
-            System.out.println("├────────────────────────────────────────────────────────┤");
-            System.out.println("│ 1. Xem danh sách khóa học (phân trang)                 │");
-            System.out.println("│ 2. Đăng ký khóa học                                    │");
-            System.out.println("│ 3. Hủy đăng ký khóa học                                │");
-            System.out.println("│ 4. Xem danh sách khóa học đã đăng ký                   │");
-            System.out.println("│ 5. Tìm kiếm khóa học theo tên (phân trang)             │");
-            System.out.println("│ 6. Sắp xếp khóa học (phân trang)                       │");
-            System.out.println("│ 7. Cập nhật thông tin cá nhân                          │");
-            System.out.println("│ 8. Đăng xuất                                           │");
+            System.out.println("│ Xin chào, " + UIUtils.truncateString(student.getFullName(), 35) + "                     │");
+            System.out.println("├───────────────────────────────────────────────┤");
+            System.out.println("│ 1. Xem danh sách khóa học (phân trang)        │");
+            System.out.println("│ 2. Đăng ký khóa học                           │");
+            System.out.println("│ 3. Hủy đăng ký khóa học                       │");
+            System.out.println("│ 4. Xem danh sách khóa học đã đăng ký          │");
+            System.out.println("│ 5. Tìm kiếm khóa học theo tên (phân trang)    │");
+            System.out.println("│ 6. Sắp xếp khóa học (phân trang)              │");
+            System.out.println("│ 7. Cập nhật thông tin cá nhân                 │");
+            System.out.println("│ 8. Đăng xuất                                  │");
             UIUtils.printFooter();
             int choice = Validator.validateInt(scanner, "Nhập lựa chọn (1-8): ");
             switch (choice) {
@@ -79,6 +79,7 @@ public class StudentUI {
             }
         }
     }
+
 
     private void registerCourse(Scanner scanner, Student student) {
         UIUtils.printHeader("ĐĂNG KÝ KHÓA HỌC");
@@ -160,17 +161,67 @@ public class StudentUI {
         System.out.println("Thông tin hiện tại:");
         UIUtils.displayStudentTable(List.of(student));
 
-        String newFullName = Validator.validateString(scanner, "Họ tên mới (Enter để giữ nguyên): ");
-        if (!newFullName.isEmpty()) student.setFullName(newFullName);
+        System.out.print("Họ tên mới (Enter để giữ nguyên): ");
+        String newFullName = scanner.nextLine().trim();
+        if (!newFullName.isEmpty()) {
+            student.setFullName(newFullName);
+        }
 
-        String newEmail = Validator.validateEmail(scanner, "Email mới (Enter để giữ nguyên): ");
-        if (!newEmail.isEmpty()) student.setEmail(newEmail);
+        // Validate email
+        while (true) {
+            System.out.print("Email mới (Enter để giữ nguyên): ");
+            String newEmail = scanner.nextLine().trim();
+            if (newEmail.isEmpty() || newEmail.equals(student.getEmail())) {
+                break;
+            }
+            if (studentService.existsByEmail(newEmail)) {
+                UIUtils.showError("Email đã tồn tại. Vui lòng nhập lại.");
+            } else {
+                student.setEmail(newEmail);
+                break;
+            }
+        }
 
-        String newPhone = Validator.validatePhone(scanner, "Số điện thoại mới (Enter để giữ nguyên): ");
-        if (!newPhone.isEmpty()) student.setPhone(newPhone);
+        // Validate phone number
+        while (true) {
+            System.out.print("Số điện thoại mới (Enter để giữ nguyên): ");
+            String newPhone = scanner.nextLine().trim();
+            if (newPhone.isEmpty() || newPhone.equals(student.getPhone())) {
+                break;
+            }
+            if (studentService.existsByPhone(newPhone)) {
+                UIUtils.showError("Số điện thoại đã tồn tại. Vui lòng nhập lại.");
+            } else {
+                student.setPhone(newPhone);
+                break;
+            }
+        }
 
-        String newPassword = Validator.validatePassword(scanner, "Mật khẩu mới (Enter để giữ nguyên): ");
-        if (!newPassword.isEmpty()) student.setPassword(newPassword);
+        System.out.println("Bạn có muốn thay đổi mật khẩu không?");
+        System.out.println("1. Giữ nguyên");
+        System.out.println("2. Đổi mật khẩu mới");
+        int passwordChoice = Validator.validateInt(scanner, "Nhập lựa chọn (1-2): ");
+        if (passwordChoice == 2) {
+            while (true) {
+                System.out.print("Nhập mật khẩu cũ: ");
+                String currentPassword = scanner.nextLine().trim();
+                if (!currentPassword.equals(student.getPassword())) {
+                    UIUtils.showError("Mật khẩu cũ không chính xác. Vui lòng thử lại.");
+                } else {
+                    String newPassword = Validator.validatePassword(scanner, "Mật khẩu mới: ");
+                    student.setPassword(newPassword);
+                    break;
+                }
+            }
+        }
+
+        // Confirm update
+        if (!confirmAction(scanner, "cập nhật thông tin cá nhân")) {
+            UIUtils.showError("Hủy cập nhật thông tin.");
+            System.out.println("Nhấn Enter để tiếp tục...");
+            scanner.nextLine();
+            return;
+        }
 
         if (studentService.update(student)) {
             UIUtils.showSuccess("Cập nhật thông tin cá nhân thành công.");
@@ -190,7 +241,12 @@ public class StudentUI {
                 UIUtils.showError("Chưa có khóa học nào hoặc không có dữ liệu ở trang này.");
                 break;
             }
-            System.out.println("\nDanh sách khóa học (Trang " + page + "):");
+
+            int totalCourses = courseService.findAll().size();
+            int totalPages = (int) Math.ceil((double) totalCourses / PAGE_SIZE);
+
+            System.out.println("\nTrang " + page + " / " + totalPages);
+            System.out.println("Danh sách khóa học:");
             UIUtils.displayCourseTable(courses);
             page = Validator.validateInt(scanner, "Nhập số trang (0 để thoát): ");
             if (page <= 0) break;
@@ -208,7 +264,11 @@ public class StudentUI {
                 UIUtils.showError("Không tìm thấy khóa học hoặc không có dữ liệu ở trang này.");
                 break;
             }
-            System.out.println("\nKết quả tìm kiếm khóa học (Trang " + page + "):");
+            int totalCourses = courseService.findByName(searchName).size();
+            int totalPages = (int) Math.ceil((double) totalCourses / PAGE_SIZE);
+
+            System.out.println("\nTrang " + page + " / " + totalPages);
+            System.out.println("Danh sách khóa học:");
             UIUtils.displayCourseTable(courses);
             page = Validator.validateInt(scanner, "Nhập số trang (0 để thoát): ");
             if (page <= 0) break;
@@ -258,7 +318,11 @@ public class StudentUI {
                 UIUtils.showError("Chưa có khóa học nào hoặc không có dữ liệu ở trang này.");
                 break;
             }
-            System.out.println("\nDanh sách khóa học đã sắp xếp (Trang " + page + "):");
+            int totalCourses = courseService.findAll().size();
+            int totalPages = (int) Math.ceil((double) totalCourses / PAGE_SIZE);
+
+            System.out.println("\nTrang " + page + " / " + totalPages);
+            System.out.println("Danh sách khóa học:");
             UIUtils.displayCourseTable(courses);
             page = Validator.validateInt(scanner, "Nhập số trang (0 để thoát): ");
             if (page <= 0) break;

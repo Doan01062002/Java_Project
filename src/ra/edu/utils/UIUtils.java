@@ -46,11 +46,12 @@ public class UIUtils {
         System.out.println("│ ID    │ Mã khóa    │ Tên khóa học             │ Thời lượng │ Giảng viên      │");
         System.out.println("├───────┼────────────┼──────────────────────────┼────────────┼─────────────────┤");
         for (Course course : courses) {
-            System.out.printf("│ %-5d │ %-10s │ %-24s │ %-10d │ %-15s │%n",
+            String timeDuration = String.valueOf(course.getDuration())+" giờ";
+            System.out.printf("│ %-5d │ %-10s │ %-24s │ %-10s │ %-15s │%n",
                     course.getId(),
                     truncateString(course.getCourseCode(), 10),
                     truncateString(course.getName(), 24),
-                    course.getDuration(),
+                    timeDuration,
                     truncateString(course.getInstructor(), 15));
         }
         System.out.println("└───────┴────────────┴──────────────────────────┴────────────┴─────────────────┘");

@@ -18,6 +18,7 @@ import ra.edu.utils.UIUtils;
 import ra.edu.validate.Validator;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
@@ -131,15 +132,11 @@ public class AdminUI {
         }
 
         String instructor = Validator.validateString(scanner, "Tên giảng viên: ");
-        String startDate = Validator.validateDate(scanner, "Ngày bắt đầu (dd/MM/yyyy, Enter để bỏ qua): ");
-        Integer createdByAdminId = null;
-        int adminIdInput = Validator.validateInt(scanner, "ID admin tạo khóa học (Enter để bỏ qua): ");
-        if (adminIdInput > 0) {
-            createdByAdminId = adminIdInput;
-        }
+        LocalDate startDate = LocalDate.now();
+        int adminId = 1;
 
-        Course course = new Course(courseCode, name, description, duration, instructor, startDate);
-        course.setCreatedByAdminId(createdByAdminId);
+        Course course = new Course(courseCode, name, description, duration, instructor, startDate.toString());
+        course.setCreatedByAdminId(adminId);
 
         if (courseService.save(course)) {
             UIUtils.showSuccess("Thêm khóa học thành công.");
@@ -164,21 +161,44 @@ public class AdminUI {
         System.out.println("Thông tin hiện tại:");
         UIUtils.displayCourseTable(List.of(course));
 
-        String newName = Validator.validateString(scanner, "Tên mới (Enter để giữ nguyên): ");
-        if (!newName.isEmpty()) course.setName(newName);
+        // Update name
+        System.out.print("Tên mới (Enter để giữ nguyên): ");
+        String newName = scanner.nextLine().trim();
+        if (!newName.isEmpty()) {
+            course.setName(newName);
+        }
 
-        String newDescription = Validator.validateString(scanner, "Mô tả mới (Enter để giữ nguyên): ");
-        if (!newDescription.isEmpty()) course.setDescription(newDescription);
+        // Update description
+        System.out.print("Mô tả mới (Enter để giữ nguyên): ");
+        String newDescription = scanner.nextLine().trim();
+        if (!newDescription.isEmpty()) {
+            course.setDescription(newDescription);
+        }
 
-        int newDuration = Validator.validateInt(scanner, "Thời lượng mới (Enter để giữ nguyên): ");
-        if (newDuration > 0) course.setDuration(newDuration);
+        // Update duration
+        System.out.print("Thời lượng mới (Enter để giữ nguyên): ");
+        String newDurationInput = scanner.nextLine().trim();
+        if (!newDurationInput.isEmpty()) {
+            try {
+                int newDuration = Integer.parseInt(newDurationInput);
+                if (newDuration > 0) {
+                    course.setDuration(newDuration);
+                } else {
+                    UIUtils.showError("Thời lượng phải lớn hơn 0.");
+                }
+            } catch (NumberFormatException e) {
+                UIUtils.showError("Thời lượng không hợp lệ.");
+            }
+        }
 
-        String newInstructor = Validator.validateString(scanner, "Tên giảng viên mới (Enter để giữ nguyên): ");
-        if (!newInstructor.isEmpty()) course.setInstructor(newInstructor);
+        // Update instructor
+        System.out.print("Tên giảng viên mới (Enter để giữ nguyên): ");
+        String newInstructor = scanner.nextLine().trim();
+        if (!newInstructor.isEmpty()) {
+            course.setInstructor(newInstructor);
+        }
 
-        String newStartDate = Validator.validateDate(scanner, "Ngày bắt đầu mới (dd/MM/yyyy, Enter để giữ nguyên): ");
-        if (!newStartDate.isEmpty()) course.setCreatedAt(newStartDate);
-
+        // Save changes
         if (courseService.update(course)) {
             UIUtils.showSuccess("Cập nhật khóa học thành công.");
         } else {
@@ -220,7 +240,12 @@ public class AdminUI {
                 UIUtils.showError("Không tìm thấy khóa học hoặc không có dữ liệu ở trang này.");
                 break;
             }
-            System.out.println("\nKết quả tìm kiếm (Trang " + page + "):");
+            // Calculate total pages
+            int totalCourses = courseService.findByName(searchName).size();
+            int totalPages = (int) Math.ceil((double) totalCourses / PAGE_SIZE);
+
+            // Display current page and total pages
+            System.out.printf("Trang %d/%d\n", page, totalPages);
             UIUtils.displayCourseTable(courses);
             page = Validator.validateInt(scanner, "Nhập số trang (0 để thoát): ");
             if (page <= 0) break;
@@ -270,7 +295,12 @@ public class AdminUI {
                 UIUtils.showError("Không có khóa học hoặc không có dữ liệu ở trang này.");
                 break;
             }
-            System.out.println("\nDanh sách khóa học đã sắp xếp (Trang " + page + "):");
+            // Calculate total pages
+            int totalCourses = courseService.findAll().size();
+            int totalPages = (int) Math.ceil((double) totalCourses / PAGE_SIZE);
+
+            // Display current page and total pages
+            System.out.printf("Trang %d/%d\n", page, totalPages);
             UIUtils.displayCourseTable(courses);
             page = Validator.validateInt(scanner, "Nhập số trang (0 để thoát): ");
             if (page <= 0) break;
@@ -288,10 +318,18 @@ public class AdminUI {
                 UIUtils.showError("Không có khóa học hoặc không có dữ liệu ở trang này.");
                 break;
             }
-            System.out.println("\nDanh sách khóa học (Trang " + page + "):");
+
+            // Calculate total pages
+            int totalCourses = courseService.findAll().size();
+            int totalPages = (int) Math.ceil((double) totalCourses / PAGE_SIZE);
+
+            // Display current page and total pages
+            System.out.printf("Trang %d/%d\n", page, totalPages);
             UIUtils.displayCourseTable(courses);
+
+            // Prompt for page navigation
             page = Validator.validateInt(scanner, "Nhập số trang (0 để thoát): ");
-            if (page <= 0) break;
+            if (page <= 0 || page > totalPages) break;
         }
         System.out.println("Nhấn Enter để tiếp tục...");
         scanner.nextLine();
@@ -342,33 +380,86 @@ public class AdminUI {
 
     private void addNewStudent(Scanner scanner) {
         UIUtils.printHeader("THÊM HỌC VIÊN MỚI");
-        String studentCode = Validator.validateStudentId(scanner, "Mã học viên (VD: SV001): ");
-        String username = Validator.validateUsername(scanner, "Tên đăng nhập: ");
-        String password = Validator.validatePassword(scanner, "Mật khẩu: ");
-        String fullName = Validator.validateString(scanner, "Họ tên: ");
-        String email = Validator.validateEmail(scanner, "Email: ");
-        String phone = Validator.validatePhone(scanner, "Số điện thoại (Enter để bỏ qua): ");
-        System.out.print("Giới tính (1: Nam, 0: Nữ, Enter để bỏ qua): ");
-        String sexInput = scanner.nextLine().trim();
-        Boolean sex = sexInput.equals("1") ? true : sexInput.equals("0") ? false : null;
-        String dobInput = Validator.validateDate(scanner, "Ngày sinh (dd/MM/yyyy, Enter để bỏ qua): ");
-        java.util.Date dob = null;
-        if (!dobInput.isEmpty()) {
-            try {
-                dob = new SimpleDateFormat("dd/MM/yyyy").parse(dobInput);
-            } catch (Exception e) {
-                UIUtils.showError("Ngày sinh không hợp lệ.");
-                return;
-            }
-        }
 
+        // Validate unique student code
+        String studentCode;
+        do {
+            studentCode = Validator.validateStudentId(scanner, "Mã học viên (VD: SV001): ");
+            if (studentService.existsByStudentCode(studentCode)) {
+                UIUtils.showError("Mã học viên đã tồn tại, vui lòng nhập mã khác.");
+                studentCode = null;
+            }
+        } while (studentCode == null);
+
+        // Validate unique username
+        String username;
+        do {
+            username = Validator.validateUsername(scanner, "Tên đăng nhập: ");
+            if (studentService.existsByUsername(username)) {
+                UIUtils.showError("Tên đăng nhập đã tồn tại, vui lòng nhập tên khác.");
+                username = null;
+            }
+        } while (username == null);
+
+        // Validate unique email
+        String email;
+        do {
+            email = Validator.validateEmail(scanner, "Email: ");
+            if (studentService.existsByEmail(email)) {
+                UIUtils.showError("Email đã tồn tại, vui lòng nhập email khác.");
+                email = null;
+            }
+        } while (email == null);
+
+        // Validate unique and mandatory phone
+        String phone;
+        do {
+            phone = Validator.validatePhone(scanner, "Số điện thoại: ");
+            if (phone.isEmpty()) {
+                UIUtils.showError("Số điện thoại là bắt buộc.");
+            } else if (studentService.existsByPhone(phone)) {
+                UIUtils.showError("Số điện thoại đã tồn tại, vui lòng nhập số khác.");
+                phone = null;
+            }
+        } while (phone == null);
+
+        // Validate mandatory gender
+        Boolean sex = null;
+        do {
+            System.out.print("Giới tính (1: Nam, 0: Nữ): ");
+            String sexInput = scanner.nextLine().trim();
+            if (sexInput.equals("1")) {
+                sex = true;
+            } else if (sexInput.equals("0")) {
+                sex = false;
+            } else {
+                UIUtils.showError("Giới tính là bắt buộc, vui lòng nhập 1 hoặc 0.");
+            }
+        } while (sex == null);
+
+        // Validate mandatory date of birth
+        java.util.Date dob = null;
+        do {
+            String dobInput = Validator.validateDate(scanner, "Ngày sinh (dd/MM/yyyy): ");
+            if (dobInput.isEmpty()) {
+                UIUtils.showError("Ngày sinh là bắt buộc.");
+            } else {
+                try {
+                    dob = new SimpleDateFormat("dd/MM/yyyy").parse(dobInput);
+                } catch (Exception e) {
+                    UIUtils.showError("Ngày sinh không hợp lệ.");
+                }
+            }
+        } while (dob == null);
+
+        // Create and save the student
         Student student = new Student();
         student.setStudentCode(studentCode);
         student.setUsername(username);
-        student.setPassword(password);
-        student.setFullName(fullName);
+        student.setPassword(Validator.validatePassword(scanner, "Mật khẩu: "));
+        student.setFullName(Validator.validateString(scanner, "Họ tên: "));
         student.setEmail(email);
-        student.setPhone(phone.isEmpty() ? null : phone);
+        student.setPhone(phone);
         student.setSex(sex);
         student.setDob(dob);
 
@@ -395,23 +486,50 @@ public class AdminUI {
         System.out.println("Thông tin hiện tại:");
         UIUtils.displayStudentTable(List.of(student));
 
-        String newFullName = Validator.validateString(scanner, "Họ tên mới (Enter để giữ nguyên): ");
-        if (!newFullName.isEmpty()) student.setFullName(newFullName);
+        // Update full name
+        System.out.print("Họ tên mới (Enter để giữ nguyên): ");
+        String newFullName = scanner.nextLine().trim();
+        if (!newFullName.isEmpty()) {
+            student.setFullName(newFullName);
+        }
 
-        String newEmail = Validator.validateEmail(scanner, "Email mới (Enter để giữ nguyên): ");
-        if (!newEmail.isEmpty()) student.setEmail(newEmail);
+        // Update email
+        System.out.print("Email mới (Enter để giữ nguyên): ");
+        String newEmail = scanner.nextLine().trim();
+        if (!newEmail.isEmpty()) {
+            if (studentService.existsByEmail(newEmail)) {
+                UIUtils.showError("Email đã tồn tại, vui lòng nhập email khác.");
+                return;
+            }
+            student.setEmail(newEmail);
+        }
 
-        String newPhone = Validator.validatePhone(scanner, "Số điện thoại mới (Enter để giữ nguyên): ");
-        if (!newPhone.isEmpty()) student.setPhone(newPhone);
+        // Update phone
+        System.out.print("Số điện thoại mới (Enter để giữ nguyên): ");
+        String newPhone = scanner.nextLine().trim();
+        if (!newPhone.isEmpty()) {
+            if (studentService.existsByPhone(newPhone)) {
+                UIUtils.showError("Số điện thoại đã tồn tại, vui lòng nhập số khác.");
+                return;
+            }
+            student.setPhone(newPhone);
+        }
 
+        // Update gender
         System.out.print("Giới tính mới (1: Nam, 0: Nữ, Enter để giữ nguyên): ");
         String sexInput = scanner.nextLine().trim();
         if (!sexInput.isEmpty()) {
             Boolean newSex = sexInput.equals("1") ? true : sexInput.equals("0") ? false : null;
+            if (newSex == null) {
+                UIUtils.showError("Giới tính không hợp lệ.");
+                return;
+            }
             student.setSex(newSex);
         }
 
-        String dobInput = Validator.validateDate(scanner, "Ngày sinh mới (dd/MM/yyyy, Enter để giữ nguyên): ");
+        // Update date of birth
+        System.out.print("Ngày sinh mới (dd/MM/yyyy, Enter để giữ nguyên): ");
+        String dobInput = scanner.nextLine().trim();
         if (!dobInput.isEmpty()) {
             try {
                 java.util.Date newDob = new SimpleDateFormat("dd/MM/yyyy").parse(dobInput);
@@ -422,6 +540,7 @@ public class AdminUI {
             }
         }
 
+        // Save changes
         if (studentService.update(student)) {
             UIUtils.showSuccess("Cập nhật học viên thành công.");
         } else {
@@ -463,7 +582,12 @@ public class AdminUI {
                 UIUtils.showError("Không tìm thấy học viên hoặc không có dữ liệu ở trang này.");
                 break;
             }
-            System.out.println("\nKết quả tìm kiếm (Trang " + page + "):");
+            // Calculate total pages
+            int totalStudents = studentService.findByNameOrEmailOrCode(searchInput).size();
+            int totalPages = (int) Math.ceil((double) totalStudents / PAGE_SIZE);
+
+            // Display current page and total pages
+            System.out.printf("Trang %d/%d\n", page, totalPages);
             UIUtils.displayStudentTable(students);
             page = Validator.validateInt(scanner, "Nhập số trang (0 để thoát): ");
             if (page <= 0) break;
@@ -513,7 +637,12 @@ public class AdminUI {
                 UIUtils.showError("Không có học viên hoặc không có dữ liệu ở trang này.");
                 break;
             }
-            System.out.println("\nDanh sách học viên đã sắp xếp (Trang " + page + "):");
+            // Calculate total pages
+            int totalStudents = studentService.findAll().size();
+            int totalPages = (int) Math.ceil((double) totalStudents / PAGE_SIZE);
+
+            // Display current page and total pages
+            System.out.printf("Trang %d/%d\n", page, totalPages);
             UIUtils.displayStudentTable(students);
             page = Validator.validateInt(scanner, "Nhập số trang (0 để thoát): ");
             if (page <= 0) break;
@@ -559,7 +688,12 @@ public class AdminUI {
                 UIUtils.showError("Không có học viên hoặc không có dữ liệu ở trang này.");
                 break;
             }
-            System.out.println("\nDanh sách học viên (Trang " + page + "):");
+            // Calculate total pages
+            int totalStudents = studentService.findAll().size();
+            int totalPages = (int) Math.ceil((double) totalStudents / PAGE_SIZE);
+
+            // Display current page and total pages
+            System.out.printf("Trang %d/%d\n", page, totalPages);
             UIUtils.displayStudentTable(students);
             page = Validator.validateInt(scanner, "Nhập số trang (0 để thoát): ");
             if (page <= 0) break;
@@ -597,42 +731,57 @@ public class AdminUI {
 
     private void deleteCancelledEnrollments(Scanner scanner) {
         UIUtils.printHeader("XÓA ĐƠN ĐĂNG KÝ BỊ HỦY");
-        List<Enrollment> cancelledEnrollments = enrollmentService.findAll()
-                .stream()
-                .filter(e -> e.getStatus() == EnrollmentStatus.CANCEL)
-                .toList();
+        System.out.println("│ 1. Xóa đơn đăng ký bị hủy theo ID             │");
+        System.out.println("│ 2. Xóa toàn bộ đơn đăng ký đã bị hủy         │");
+        UIUtils.printFooter();
+        int choice = Validator.validateInt(scanner, "Nhập lựa chọn (1-2): ");
 
-        if (cancelledEnrollments.isEmpty()) {
-            UIUtils.showError("Không có đơn đăng ký nào ở trạng thái bị hủy.");
-            System.out.println("Nhấn Enter để tiếp tục...");
-            scanner.nextLine();
-            return;
-        }
+        switch (choice) {
+            case 1:
+                // Delete by ID
+                int id = Validator.validateInt(scanner, "Nhập ID đơn đăng ký cần xóa: ");
+                Enrollment enrollment = enrollmentService.findById(id);
+                if (enrollment == null || enrollment.getStatus() != EnrollmentStatus.CANCEL) {
+                    UIUtils.showError("Đơn đăng ký không tồn tại hoặc không ở trạng thái bị hủy.");
+                    break;
+                }
+                if (confirmAction(scanner, "xóa đơn đăng ký")) {
+                    if (enrollmentService.deleteById(id)) {
+                        UIUtils.showSuccess("Xóa đơn đăng ký thành công.");
+                    } else {
+                        UIUtils.showError("Xóa đơn đăng ký thất bại.");
+                    }
+                }
+                break;
 
-        System.out.println("Danh sách đơn đăng ký bị hủy:");
-        UIUtils.displayEnrollmentTable(cancelledEnrollments, courseService);
+            case 2:
+                // Delete all canceled registrations
+                List<Enrollment> cancelledEnrollments = enrollmentService.findAll()
+                        .stream()
+                        .filter(e -> e.getStatus() == EnrollmentStatus.CANCEL)
+                        .toList();
+                if (cancelledEnrollments.isEmpty()) {
+                    UIUtils.showError("Không có đơn đăng ký nào ở trạng thái bị hủy.");
+                    break;
+                }
+                if (confirmAction(scanner, "xóa toàn bộ đơn đăng ký bị hủy")) {
+                    boolean success = true;
+                    for (Enrollment e : cancelledEnrollments) {
+                        if (!enrollmentService.deleteById(e.getId())) {
+                            success = false;
+                            break;
+                        }
+                    }
+                    if (success) {
+                        UIUtils.showSuccess("Xóa toàn bộ đơn đăng ký bị hủy thành công.");
+                    } else {
+                        UIUtils.showError("Xóa toàn bộ đơn đăng ký bị hủy thất bại.");
+                    }
+                }
+                break;
 
-        int id = Validator.validateInt(scanner, "Nhập ID đơn đăng ký cần xóa: ");
-        Enrollment enrollment = enrollmentService.findById(id);
-        if (enrollment == null) {
-            UIUtils.showError("Đơn đăng ký không tồn tại.");
-            System.out.println("Nhấn Enter để tiếp tục...");
-            scanner.nextLine();
-            return;
-        }
-        if (enrollment.getStatus() != EnrollmentStatus.CANCEL) {
-            UIUtils.showError("Chỉ có thể xóa đơn đăng ký ở trạng thái bị hủy.");
-            System.out.println("Nhấn Enter để tiếp tục...");
-            scanner.nextLine();
-            return;
-        }
-
-        if (confirmAction(scanner, "xóa đơn đăng ký")) {
-            if (enrollmentService.deleteById(id)) {
-                UIUtils.showSuccess("Xóa đơn đăng ký thành công.");
-            } else {
-                UIUtils.showError("Xóa đơn đăng ký thất bại.");
-            }
+            default:
+                UIUtils.showError("Lựa chọn không hợp lệ.");
         }
         System.out.println("Nhấn Enter để tiếp tục...");
         scanner.nextLine();
@@ -656,7 +805,13 @@ public class AdminUI {
                 UIUtils.showError("Không có đăng ký nào hoặc không có dữ liệu ở trang này.");
                 break;
             }
-            System.out.println("\nDanh sách đăng ký khóa học ID " + courseId + " (Trang " + page + "):");
+
+            // Calculate total pages
+            int totalEnrollments = enrollmentService.findByCourseId(courseId).size();
+            int totalPages = (int) Math.ceil((double) totalEnrollments / PAGE_SIZE);
+
+            // Display current page and total pages at the top
+            System.out.printf("Trang %d/%d\n", page, totalPages);
             UIUtils.displayEnrollmentTable(enrollments, courseService);
             page = Validator.validateInt(scanner, "Nhập số trang (0 để thoát): ");
             if (page <= 0) break;
@@ -706,10 +861,8 @@ public class AdminUI {
             return;
         }
 
-        int adminId = Validator.validateInt(scanner, "Nhập ID admin xử lý (Enter để bỏ qua): ");
-        if (adminId > 0) {
-            enrollment.setAdminRefId(adminId);
-        }
+        int adminId = 1;
+        enrollment.setAdminRefId(adminId);
 
         if (enrollmentService.update(enrollment)) {
             UIUtils.showSuccess("Xử lý đăng ký thành công.");

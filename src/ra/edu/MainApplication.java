@@ -43,39 +43,97 @@ public class MainApplication {
                     String studentUsername = Validator.validateString(scanner, "Tên đăng nhập: ");
                     String studentPassword = Validator.validatePassword(scanner, "Mật khẩu: ");
                     Student student = studentService.login(studentUsername, studentPassword);
-                    if (student != null) {
+
+                    if (student == null) {
+                        UIUtils.showError("Tên đăng nhập hoặc mật khẩu không đúng.");
+                    } else if (!student.isActive()) {
+                        UIUtils.showError("Tài khoản của bạn đã bị khóa.");
+                    } else if (!student.getPassword().equals(studentPassword)) {
+                        UIUtils.showError("Tên đăng nhập hoặc mật khẩu không đúng.");
+                    } else {
                         UIUtils.showSuccess("Đăng nhập thành công!");
                         StudentUI studentUI = new StudentUI();
                         studentUI.displayMenuStudent(scanner, student);
-                    } else {
-                        UIUtils.showError("Tên đăng nhập hoặc mật khẩu không đúng.");
                     }
+
                     System.out.println("Nhấn Enter để tiếp tục...");
                     scanner.nextLine();
                     break;
                 case 3:
                     UIUtils.printHeader("ĐĂNG KÝ HỌC VIÊN");
-                    String studentCode = Validator.validateStudentId(scanner, "Mã học viên (VD: SV001): ");
-                    String username = Validator.validateUsername(scanner, "Tên đăng nhập: ");
-                    String password = Validator.validatePassword(scanner, "Mật khẩu: ");
-                    String fullName = Validator.validateString(scanner, "Họ tên: ");
-                    String email = Validator.validateEmail(scanner, "Email: ");
-                    String phone = Validator.validatePhone(scanner, "Số điện thoại (Enter để bỏ qua): ");
-                    System.out.print("Giới tính (1: Nam, 0: Nữ, Enter để bỏ qua): ");
-                    String sexInput = scanner.nextLine().trim();
-                    Boolean sex = sexInput.equals("1") ? true : sexInput.equals("0") ? false : null;
-                    String dobInput = Validator.validateDate(scanner, "Ngày sinh (dd/MM/yyyy, Enter để bỏ qua): ");
-                    java.util.Date dob = null;
-                    if (!dobInput.isEmpty()) {
-                        try {
-                            dob = new SimpleDateFormat("dd/MM/yyyy").parse(dobInput);
-                        } catch (Exception e) {
-                            UIUtils.showError("Ngày sinh không hợp lệ.");
-                            System.out.println("Nhấn Enter để tiếp tục...");
-                            scanner.nextLine();
+
+                    // Generate unique student code
+                    String studentCode;
+                    do {
+                        studentCode = "SV" + (int) (Math.random() * 900 + 100); // Random 3-digit number
+                    } while (studentService.existsByStudentCode(studentCode));
+
+                    System.out.println("Mã học viên: " + studentCode);
+
+                    // Validate unique username
+                    String username;
+                    while (true) {
+                        username = Validator.validateUsername(scanner, "Tên đăng nhập: ");
+                        if (studentService.existsByUsername(username)) {
+                            UIUtils.showError("Tên đăng nhập đã tồn tại. Vui lòng nhập lại.");
+                        } else {
                             break;
                         }
                     }
+
+                    // Validate unique email
+                    String email;
+                    while (true) {
+                        email = Validator.validateEmail(scanner, "Email: ");
+                        if (studentService.existsByEmail(email)) {
+                            UIUtils.showError("Email đã tồn tại. Vui lòng nhập lại.");
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // Validate unique phone number
+                    String phone;
+                    while (true) {
+                        phone = Validator.validatePhone(scanner, "Số điện thoại: ");
+                        if (studentService.existsByPhone(phone)) {
+                            UIUtils.showError("Số điện thoại đã tồn tại. Vui lòng nhập lại.");
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // Validate gender
+                    Boolean sex;
+                    while (true) {
+                        System.out.print("Giới tính (1: Nam, 0: Nữ): ");
+                        String sexInput = scanner.nextLine().trim();
+                        if (sexInput.equals("1")) {
+                            sex = true;
+                            break;
+                        } else if (sexInput.equals("0")) {
+                            sex = false;
+                            break;
+                        } else {
+                            UIUtils.showError("Vui lòng nhập 1 (Nam) hoặc 0 (Nữ).");
+                        }
+                    }
+
+                    // Validate date of birth
+                    java.util.Date dob;
+                    while (true) {
+                        String dobInput = Validator.validateDate(scanner, "Ngày sinh (dd/MM/yyyy): ");
+                        try {
+                            dob = new SimpleDateFormat("dd/MM/yyyy").parse(dobInput);
+                            break;
+                        } catch (Exception e) {
+                            UIUtils.showError("Ngày sinh không hợp lệ. Vui lòng nhập lại.");
+                        }
+                    }
+
+                    // Create and register the student
+                    String password = Validator.validatePassword(scanner, "Mật khẩu: ");
+                    String fullName = Validator.validateString(scanner, "Họ tên: ");
 
                     Student newStudent = new Student();
                     newStudent.setStudentCode(studentCode);
@@ -83,7 +141,7 @@ public class MainApplication {
                     newStudent.setPassword(password);
                     newStudent.setFullName(fullName);
                     newStudent.setEmail(email);
-                    newStudent.setPhone(phone.isEmpty() ? null : phone);
+                    newStudent.setPhone(phone);
                     newStudent.setSex(sex);
                     newStudent.setDob(dob);
 

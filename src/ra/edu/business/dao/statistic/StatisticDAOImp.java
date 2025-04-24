@@ -56,12 +56,12 @@ public class StatisticDAOImp implements StatisticDAO {
             while (rs.next()) {
                 Course course = new Course();
                 course.setId(rs.getInt("id"));
-                course.setCourseCode(rs.getString("courseCode"));
+                course.setCourseCode(rs.getString("course_code"));
                 course.setName(rs.getString("name"));
                 course.setDescription(rs.getString("description"));
                 course.setDuration(rs.getInt("duration"));
                 course.setInstructor(rs.getString("instructor"));
-                course.setCreatedAt(rs.getString("createdAt"));
+                course.setCreatedAt(rs.getString("created_at"));
                 // Add student count as a custom field if needed
                 courses.add(course);
             }
@@ -83,12 +83,12 @@ public class StatisticDAOImp implements StatisticDAO {
             while (rs.next()) {
                 Course course = new Course();
                 course.setId(rs.getInt("id"));
-                course.setCourseCode(rs.getString("courseCode"));
+                course.setCourseCode(rs.getString("course_code"));
                 course.setName(rs.getString("name"));
                 course.setDescription(rs.getString("description"));
                 course.setDuration(rs.getInt("duration"));
                 course.setInstructor(rs.getString("instructor"));
-                course.setCreatedAt(rs.getString("createdAt"));
+                course.setCreatedAt(rs.getString("created_at"));
                 courses.add(course);
             }
         } catch (SQLException e) {
@@ -109,12 +109,12 @@ public class StatisticDAOImp implements StatisticDAO {
             while (rs.next()) {
                 Course course = new Course();
                 course.setId(rs.getInt("id"));
-                course.setCourseCode(rs.getString("courseCode"));
+                course.setCourseCode(rs.getString("course_code"));
                 course.setName(rs.getString("name"));
                 course.setDescription(rs.getString("description"));
                 course.setDuration(rs.getInt("duration"));
                 course.setInstructor(rs.getString("instructor"));
-                course.setCreatedAt(rs.getString("createdAt"));
+                course.setCreatedAt(rs.getString("created_at"));
                 courses.add(course);
             }
         } catch (SQLException e) {

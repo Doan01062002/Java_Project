@@ -156,10 +156,6 @@ public class StudentDAOImp implements StudentDAO {
             stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                if (!rs.getBoolean("is_active")) {
-                    System.out.println("Tài khoản của bạn đã bị khóa.");
-                    return null;
-                }
                 Student student = new Student(
                         rs.getInt("id"),
                         rs.getString("username"),
