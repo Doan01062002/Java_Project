@@ -84,4 +84,11 @@ public class StudentServiceImp implements StudentService{
     public List<Student> findAll() {
         return studentDAO.findAll();
     }
+
+    public Student findByEmail(String email) {
+        return students.stream()
+                .filter(student -> student.getEmail().equalsIgnoreCase(email))
+                .findFirst()
+                .orElse(null);
+    }
 }

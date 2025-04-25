@@ -130,4 +130,20 @@ public class Validator {
             UIUtils.showError("Username phải dài 10-45 ký tự, viết liền, không dấu, chỉ dùng chữ thường và số!");
         }
     }
+
+    // Validate name (only letters and spaces, minimum 2 characters)
+    public static boolean isValidName(String name) {
+        return name != null && name.matches("^[a-zA-Z\\s]{2,}$");
+    }
+
+    // Validate email using a regex pattern
+    public static boolean isValidEmail(String email) {
+        String emailRegex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+        return email != null && Pattern.matches(emailRegex, email);
+    }
+
+    // Validate phone number (only digits, 10-15 characters)
+    public static boolean isValidPhone(String phone) {
+        return phone != null && phone.matches("^(0[3|5|7|8|9])+([0-9]{8})$");
+    }
 }

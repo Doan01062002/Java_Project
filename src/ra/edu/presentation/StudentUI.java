@@ -161,36 +161,39 @@ public class StudentUI {
         System.out.println("Thông tin hiện tại:");
         UIUtils.displayStudentTable(List.of(student));
 
-        System.out.print("Họ tên mới (Enter để giữ nguyên): ");
-        String newFullName = scanner.nextLine().trim();
-        if (!newFullName.isEmpty()) {
-            student.setFullName(newFullName);
+        // Update full name
+        while (true) {
+            System.out.print("Họ tên mới (Enter để giữ nguyên): ");
+            String newFullName = scanner.nextLine().trim();
+            if (newFullName.isEmpty()) break;
+            if (!Validator.isValidName(newFullName)) {
+                UIUtils.showError("Họ tên không hợp lệ. Vui lòng nhập lại.");
+            } else {
+                student.setFullName(newFullName);
+                break;
+            }
         }
 
-        // Validate email
+        // Update email
         while (true) {
             System.out.print("Email mới (Enter để giữ nguyên): ");
             String newEmail = scanner.nextLine().trim();
-            if (newEmail.isEmpty() || newEmail.equals(student.getEmail())) {
-                break;
-            }
-            if (studentService.existsByEmail(newEmail)) {
-                UIUtils.showError("Email đã tồn tại. Vui lòng nhập lại.");
+            if (newEmail.isEmpty()) break;
+            if (!Validator.isValidEmail(newEmail) || studentService.existsByEmail(newEmail)) {
+                UIUtils.showError("Email không hợp lệ hoặc đã tồn tại. Vui lòng nhập lại.");
             } else {
                 student.setEmail(newEmail);
                 break;
             }
         }
 
-        // Validate phone number
+        // Update phone
         while (true) {
             System.out.print("Số điện thoại mới (Enter để giữ nguyên): ");
             String newPhone = scanner.nextLine().trim();
-            if (newPhone.isEmpty() || newPhone.equals(student.getPhone())) {
-                break;
-            }
-            if (studentService.existsByPhone(newPhone)) {
-                UIUtils.showError("Số điện thoại đã tồn tại. Vui lòng nhập lại.");
+            if (newPhone.isEmpty()) break;
+            if (!Validator.isValidPhone(newPhone) || studentService.existsByPhone(newPhone)) {
+                UIUtils.showError("Số điện thoại không hợp lệ hoặc đã tồn tại. Vui lòng nhập lại.");
             } else {
                 student.setPhone(newPhone);
                 break;

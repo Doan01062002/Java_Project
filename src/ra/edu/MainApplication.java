@@ -7,6 +7,7 @@ import ra.edu.business.service.admin.AdminServiceImp;
 import ra.edu.business.service.student.StudentServiceImp;
 import ra.edu.presentation.AdminUI;
 import ra.edu.presentation.StudentUI;
+import ra.edu.utils.EmailService;
 import ra.edu.utils.UIUtils;
 import ra.edu.validate.Validator;
 
@@ -154,6 +155,45 @@ public class MainApplication {
                     scanner.nextLine();
                     break;
                 case 4:
+                    UIUtils.printHeader("QUÊN MẬT KHẨU HỌC VIÊN");
+
+                    // Prompt for email
+                    String emailRe = Validator.validateEmail(scanner, "Nhập email đã đăng ký: ");
+                    Student existingStudent = studentService.findByEmail(emailRe);
+
+                    if (existingStudent == null) {
+                        UIUtils.showError("Không tìm thấy tài khoản với email đã nhập.");
+                    } else {
+                        // Generate reset code
+                        String resetCode = String.valueOf((int) (Math.random() * 900000 + 100000)); // 6-digit code
+                        EmailService.sendResetCode(emailRe, resetCode); // Send email with reset code
+                        UIUtils.showSuccess("Mã đặt lại mật khẩu đã được gửi đến email của bạn.");
+
+                        // Validate reset code
+                        String enteredCode;
+                        do {
+                            System.out.print("Nhập mã đặt lại mật khẩu: ");
+                            enteredCode = scanner.nextLine().trim();
+                            if (!enteredCode.equals(resetCode)) {
+                                UIUtils.showError("Mã đặt lại mật khẩu không chính xác. Vui lòng thử lại.");
+                            }
+                        } while (!enteredCode.equals(resetCode));
+
+                        // Allow password reset
+                        String newPassword = Validator.validatePassword(scanner, "Mật khẩu mới: ");
+                        existingStudent.setPassword(newPassword);
+
+                        if (studentService.update(existingStudent)) {
+                            UIUtils.showSuccess("Đặt lại mật khẩu thành công.");
+                        } else {
+                            UIUtils.showError("Đặt lại mật khẩu thất bại.");
+                        }
+                    }
+
+                    System.out.println("Nhấn Enter để tiếp tục...");
+                    scanner.nextLine();
+                    break;
+                case 5:
                     UIUtils.showSuccess("Thoát chương trình. Tạm biệt!");
                     scanner.close();
                     System.exit(0);
@@ -168,7 +208,8 @@ public class MainApplication {
         System.out.println("│ 1. Đăng nhập Admin                            │");
         System.out.println("│ 2. Đăng nhập Học viên                         │");
         System.out.println("│ 3. Đăng ký tài khoản Học viên                 │");
-        System.out.println("│ 4. Thoát                                      │");
+        System.out.println("│ 4. Quên mật khẩu Học viên                     │");
+        System.out.println("│ 5. Thoát                                      │");
         UIUtils.printFooter();
     }
 }

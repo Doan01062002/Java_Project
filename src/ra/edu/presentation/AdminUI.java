@@ -487,56 +487,71 @@ public class AdminUI {
         UIUtils.displayStudentTable(List.of(student));
 
         // Update full name
-        System.out.print("Họ tên mới (Enter để giữ nguyên): ");
-        String newFullName = scanner.nextLine().trim();
-        if (!newFullName.isEmpty()) {
-            student.setFullName(newFullName);
+        while (true) {
+            System.out.print("Họ tên mới (Enter để giữ nguyên): ");
+            String newFullName = scanner.nextLine().trim();
+            if (newFullName.isEmpty()) break;
+            if (!Validator.isValidName(newFullName)) {
+                UIUtils.showError("Họ tên không hợp lệ. Vui lòng nhập lại.");
+            } else {
+                student.setFullName(newFullName);
+                break;
+            }
         }
 
         // Update email
-        System.out.print("Email mới (Enter để giữ nguyên): ");
-        String newEmail = scanner.nextLine().trim();
-        if (!newEmail.isEmpty()) {
-            if (studentService.existsByEmail(newEmail)) {
-                UIUtils.showError("Email đã tồn tại, vui lòng nhập email khác.");
-                return;
+        while (true) {
+            System.out.print("Email mới (Enter để giữ nguyên): ");
+            String newEmail = scanner.nextLine().trim();
+            if (newEmail.isEmpty()) break;
+            if (!Validator.isValidEmail(newEmail) || studentService.existsByEmail(newEmail)) {
+                UIUtils.showError("Email không hợp lệ hoặc đã tồn tại. Vui lòng nhập lại.");
+            } else {
+                student.setEmail(newEmail);
+                break;
             }
-            student.setEmail(newEmail);
         }
 
         // Update phone
-        System.out.print("Số điện thoại mới (Enter để giữ nguyên): ");
-        String newPhone = scanner.nextLine().trim();
-        if (!newPhone.isEmpty()) {
-            if (studentService.existsByPhone(newPhone)) {
-                UIUtils.showError("Số điện thoại đã tồn tại, vui lòng nhập số khác.");
-                return;
+        while (true) {
+            System.out.print("Số điện thoại mới (Enter để giữ nguyên): ");
+            String newPhone = scanner.nextLine().trim();
+            if (newPhone.isEmpty()) break;
+            if (!Validator.isValidPhone(newPhone) || studentService.existsByPhone(newPhone)) {
+                UIUtils.showError("Số điện thoại không hợp lệ hoặc đã tồn tại. Vui lòng nhập lại.");
+            } else {
+                student.setPhone(newPhone);
+                break;
             }
-            student.setPhone(newPhone);
         }
 
         // Update gender
-        System.out.print("Giới tính mới (1: Nam, 0: Nữ, Enter để giữ nguyên): ");
-        String sexInput = scanner.nextLine().trim();
-        if (!sexInput.isEmpty()) {
-            Boolean newSex = sexInput.equals("1") ? true : sexInput.equals("0") ? false : null;
-            if (newSex == null) {
-                UIUtils.showError("Giới tính không hợp lệ.");
-                return;
+        while (true) {
+            System.out.print("Giới tính mới (1: Nam, 0: Nữ, Enter để giữ nguyên): ");
+            String sexInput = scanner.nextLine().trim();
+            if (sexInput.isEmpty()) break;
+            if (sexInput.equals("1")) {
+                student.setSex(true);
+                break;
+            } else if (sexInput.equals("0")) {
+                student.setSex(false);
+                break;
+            } else {
+                UIUtils.showError("Giới tính không hợp lệ. Vui lòng nhập lại.");
             }
-            student.setSex(newSex);
         }
 
         // Update date of birth
-        System.out.print("Ngày sinh mới (dd/MM/yyyy, Enter để giữ nguyên): ");
-        String dobInput = scanner.nextLine().trim();
-        if (!dobInput.isEmpty()) {
+        while (true) {
+            System.out.print("Ngày sinh mới (dd/MM/yyyy, Enter để giữ nguyên): ");
+            String dobInput = scanner.nextLine().trim();
+            if (dobInput.isEmpty()) break;
             try {
                 java.util.Date newDob = new SimpleDateFormat("dd/MM/yyyy").parse(dobInput);
                 student.setDob(newDob);
+                break;
             } catch (Exception e) {
-                UIUtils.showError("Ngày sinh không hợp lệ.");
-                return;
+                UIUtils.showError("Ngày sinh không hợp lệ. Vui lòng nhập lại.");
             }
         }
 
